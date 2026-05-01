@@ -892,7 +892,6 @@
             <div class="venue-slide">
               <img src="место2.jpg" alt="Место проведения">
             </div>
-           
           </div>
           <div class="slider-dots" id="sliderDots">
             <span class="slider-dot active" data-index="0"></span>
@@ -964,8 +963,6 @@
               <label class="radio-option"><input type="radio" name="attendance" value="no"> К сожалению, нет</label>
             </div>
           </div>
-
-        
 
           <button type="submit" class="form-submit">Отправить</button>
         </form>
@@ -1095,17 +1092,15 @@
         invScreen.addEventListener('scroll', handleScrollAnimation, { passive: true });
       }
 
-      // Слайдер изображений — 3 фото
+      // Слайдер изображений — 2 фото, без автопрокрутки
       const slider = document.getElementById('venueSlider');
       const dots = document.querySelectorAll('.slider-dot');
-      let currentSlide = 0;
-      const totalSlides = 3;
+      const totalSlides = dots.length;
 
       function goToSlide(index) {
-        currentSlide = index;
-        slider.style.transform = `translateX(-${currentSlide * 100}%)`;
+        slider.style.transform = `translateX(-${index * 100}%)`;
         dots.forEach(dot => dot.classList.remove('active'));
-        dots[currentSlide].classList.add('active');
+        dots[index].classList.add('active');
       }
 
       dots.forEach(dot => {
@@ -1113,12 +1108,6 @@
           goToSlide(parseInt(this.dataset.index));
         });
       });
-
-      // Автопереключение слайдера каждые 3 секунды
-      setInterval(() => {
-        currentSlide = (currentSlide + 1) % totalSlides;
-        goToSlide(currentSlide);
-      }, 3000);
 
       // Таймер обратного отсчёта (дата: 19 июня 2026)
       function startCountdown() {
