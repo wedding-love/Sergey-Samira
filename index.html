@@ -997,7 +997,6 @@
 
 <script>
   (function() {
-    // --- 1. ПЕРЕМЕННЫЕ ЭКРАНОВ И СЛАЙДЕРА "ОТВЕТИТЬ" ---
     const track = document.getElementById('sliderTrack');
     const btn = document.getElementById('sliderBtn');
     const callScreen = document.getElementById('callScreen');
@@ -1015,12 +1014,14 @@
     function getX(e) { return e.type.includes('mouse') ? e.pageX : e.touches[0].clientX; }
 
     function onDragStart(e) {
+      e.preventDefault();
       isDragging = true;
       startX = getX(e);
       btn.style.transition = 'none';
     }
     function onDragMove(e) {
       if (!isDragging) return;
+      if (e.type === 'touchmove') e.preventDefault();
       let walk = getX(e) - startX;
       if (walk < 0) walk = 0;
       if (walk > maxSlide) walk = maxSlide;
@@ -1049,7 +1050,9 @@
         setTimeout(() => {
           if (invScreen) {
             invScreen.classList.add('active');
-            handleScrollAnimation();
+            requestAnimationFrame(() => {
+              handleScrollAnimation();
+            });
           }
         }, 400);
       }, 150);
@@ -1062,17 +1065,24 @@
     document.addEventListener('mousemove', onDragMove);
     document.addEventListener('mouseup', onDragEnd);
 
-    // --- 2. АНИМАЦИИ ПРИ ПРОКРУТКЕ ---
-    function isElementInViewport(el, offset = 0.1) {
+    function isElementInViewport(el, offset = 0.15) {
       const rect = el.getBoundingClientRect();
       const windowHeight = window.innerHeight || document.documentElement.clientHeight;
-      return rect.top <= windowHeight * (1 - offset);
+      return rect.top <= windowHeight * (1 - offset) && rect.bottom >= 0;
     }
 
     function handleScrollAnimation() {
-      const elements = document.querySelectorAll('.fade-in-element:not(.visible), .fade-in-image:not(.visible)');
-      elements.forEach(el => {
-        if (isElementInViewport(el)) {
+      const fadeElements = document.querySelectorAll('.fade-in-element:not(.visible)');
+      const fadeImages = document.querySelectorAll('.fade-in-image:not(.visible)');
+      
+      fadeElements.forEach(el => {
+        if (isElementInViewport(el, 0.2)) {
+          el.classList.add('visible');
+        }
+      });
+      
+      fadeImages.forEach(el => {
+        if (isElementInViewport(el, 0.25)) {
           el.classList.add('visible');
         }
       });
@@ -1082,12 +1092,11 @@
       invScreen.addEventListener('scroll', handleScrollAnimation, { passive: true });
     }
 
-    // --- 3. СЛАЙДЕР ФОТОГРАФИЙ МЕСТА ---
+    // Слайдер изображений
     const slider = document.getElementById('venueSlider');
     const dots = document.querySelectorAll('.slider-dot');
 
     function goToSlide(index) {
-      if (!slider) return;
       slider.style.transform = `translateX(-${index * 100}%)`;
       dots.forEach(dot => dot.classList.remove('active'));
       dots[index].classList.add('active');
@@ -1095,41 +1104,36 @@
 
     dots.forEach(dot => {
       dot.addEventListener('click', function() {
-        goToSlide(parseInt(this.getAttribute('data-index')));
+        goToSlide(parseInt(this.dataset.index));
       });
     });
 
-    // --- 4. ЛОГИКА ТАЙМЕРА (ИСПРАВЛЕНО) ---
-    function updateCountdown() {
-      // Дата свадьбы: 19 июня 2026, 15:00
-      // Месяцы в JS: 0 - январь, 5 - июнь
-      const weddingDate = new Date(2026, 5, 19, 15, 0, 0).getTime();
-      const now = new Date().getTime();
-      const distance = weddingDate - now;
-
-      if (distance < 0) {
-        document.querySelector('.countdown-title').innerHTML = "Событие состоялось!";
-        document.getElementById('countdownRow').style.display = 'none';
-        return;
+    // Таймер обратного отсчёта — логика как в примере
+    function startCountdown() {
+      const weddingDate = new Date('2026-06-19T15:00:00');
+      function updateTimer() {
+        const now = new Date();
+        const diff = weddingDate - now;
+        if (diff <= 0) {
+          document.getElementById('days').textContent = '00';
+          document.getElementById('hours').textContent = '00';
+          document.getElementById('minutes').textContent = '00';
+          document.getElementById('seconds').textContent = '00';
+          return;
+        }
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+        document.getElementById('days').textContent = days < 10 ? '0' + days : days;
+        document.getElementById('hours').textContent = hours < 10 ? '0' + hours : hours;
+        document.getElementById('minutes').textContent = minutes < 10 ? '0' + minutes : minutes;
+        document.getElementById('seconds').textContent = seconds < 10 ? '0' + seconds : seconds;
       }
-
-      // Математический расчет
-      const d = Math.floor(distance / (1000 * 60 * 60 * 24));
-      const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-      const s = Math.floor((distance % (1000 * 60)) / 1000);
-
-      // Запись в HTML с добавлением нуля спереди
-      document.getElementById('days').innerText = d < 10 ? '0' + d : d;
-      document.getElementById('hours').innerText = h < 10 ? '0' + h : h;
-      document.getElementById('minutes').innerText = m < 10 ? '0' + m : m;
-      document.getElementById('seconds').innerText = s < 10 ? '0' + s : s;
+      updateTimer();
+      setInterval(updateTimer, 1000);
     }
-
-    // Запуск таймера
-    updateCountdown();
-    setInterval(updateCountdown, 1000);
-
+    startCountdown();
   })();
 </script>
 </body>
