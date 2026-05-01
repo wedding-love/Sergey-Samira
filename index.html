@@ -995,146 +995,152 @@
     </div>
   </div>
 
-<script>
-  (function() {
-    const track = document.getElementById('sliderTrack');
-    const btn = document.getElementById('sliderBtn');
-    const callScreen = document.getElementById('callScreen');
-    const invScreen = document.getElementById('invScreen');
-    
-    let isDragging = false;
-    let startX = 0, currentX = 0, maxSlide = 0;
+  <script>
+    (function() {
+      const track = document.getElementById('sliderTrack');
+      const btn = document.getElementById('sliderBtn');
+      const callScreen = document.getElementById('callScreen');
+      const invScreen = document.getElementById('invScreen');
+      
+      let isDragging = false;
+      let startX = 0, currentX = 0, maxSlide = 0;
 
-    function updateMaxSlide() {
-      if (track && btn) maxSlide = track.offsetWidth - btn.offsetWidth - 12;
-    }
-    window.addEventListener('load', updateMaxSlide);
-    window.addEventListener('resize', updateMaxSlide);
-
-    function getX(e) { return e.type.includes('mouse') ? e.pageX : e.touches[0].clientX; }
-
-    function onDragStart(e) {
-      e.preventDefault();
-      isDragging = true;
-      startX = getX(e);
-      btn.style.transition = 'none';
-    }
-    function onDragMove(e) {
-      if (!isDragging) return;
-      if (e.type === 'touchmove') e.preventDefault();
-      let walk = getX(e) - startX;
-      if (walk < 0) walk = 0;
-      if (walk > maxSlide) walk = maxSlide;
-      currentX = walk;
-      btn.style.transform = `translateX(${currentX}px)`;
-    }
-    function onDragEnd() {
-      if (!isDragging) return;
-      isDragging = false;
-      if (currentX >= maxSlide - 20) {
-        btn.style.transition = 'transform 0.2s ease-out';
-        btn.style.transform = `translateX(${maxSlide}px)`;
-        acceptCall();
-      } else {
-        btn.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)';
-        btn.style.transform = `translateX(0px)`;
-        currentX = 0;
+      function updateMaxSlide() {
+        if (track && btn) maxSlide = track.offsetWidth - btn.offsetWidth - 12;
       }
-    }
-    function acceptCall() {
-      setTimeout(() => {
-        if (callScreen) {
-          callScreen.style.opacity = '0';
-          callScreen.style.visibility = 'hidden';
+      window.addEventListener('load', updateMaxSlide);
+      window.addEventListener('resize', updateMaxSlide);
+
+      function getX(e) { return e.type.includes('mouse') ? e.pageX : e.touches[0].clientX; }
+
+      function onDragStart(e) {
+        e.preventDefault();
+        isDragging = true;
+        startX = getX(e);
+        btn.style.transition = 'none';
+      }
+      function onDragMove(e) {
+        if (!isDragging) return;
+        if (e.type === 'touchmove') e.preventDefault();
+        let walk = getX(e) - startX;
+        if (walk < 0) walk = 0;
+        if (walk > maxSlide) walk = maxSlide;
+        currentX = walk;
+        btn.style.transform = `translateX(${currentX}px)`;
+      }
+      function onDragEnd() {
+        if (!isDragging) return;
+        isDragging = false;
+        if (currentX >= maxSlide - 20) {
+          btn.style.transition = 'transform 0.2s ease-out';
+          btn.style.transform = `translateX(${maxSlide}px)`;
+          acceptCall();
+        } else {
+          btn.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)';
+          btn.style.transform = `translateX(0px)`;
+          currentX = 0;
         }
+      }
+      function acceptCall() {
         setTimeout(() => {
-          if (invScreen) {
-            invScreen.classList.add('active');
-            requestAnimationFrame(() => {
-              handleScrollAnimation();
-            });
+          if (callScreen) {
+            callScreen.style.opacity = '0';
+            callScreen.style.visibility = 'hidden';
           }
-        }, 400);
-      }, 150);
-    }
-
-    btn.addEventListener('touchstart', onDragStart, {passive: false});
-    document.addEventListener('touchmove', onDragMove, {passive: false});
-    document.addEventListener('touchend', onDragEnd);
-    btn.addEventListener('mousedown', onDragStart);
-    document.addEventListener('mousemove', onDragMove);
-    document.addEventListener('mouseup', onDragEnd);
-
-    function isElementInViewport(el, offset = 0.15) {
-      const rect = el.getBoundingClientRect();
-      const windowHeight = window.innerHeight || document.documentElement.clientHeight;
-      return rect.top <= windowHeight * (1 - offset) && rect.bottom >= 0;
-    }
-
-    function handleScrollAnimation() {
-      const fadeElements = document.querySelectorAll('.fade-in-element:not(.visible)');
-      const fadeImages = document.querySelectorAll('.fade-in-image:not(.visible)');
-      
-      fadeElements.forEach(el => {
-        if (isElementInViewport(el, 0.2)) {
-          el.classList.add('visible');
-        }
-      });
-      
-      fadeImages.forEach(el => {
-        if (isElementInViewport(el, 0.25)) {
-          el.classList.add('visible');
-        }
-      });
-    }
-
-    if (invScreen) {
-      invScreen.addEventListener('scroll', handleScrollAnimation, { passive: true });
-    }
-
-    // Слайдер изображений
-    const slider = document.getElementById('venueSlider');
-    const dots = document.querySelectorAll('.slider-dot');
-
-    function goToSlide(index) {
-      slider.style.transform = `translateX(-${index * 100}%)`;
-      dots.forEach(dot => dot.classList.remove('active'));
-      dots[index].classList.add('active');
-    }
-
-    dots.forEach(dot => {
-      dot.addEventListener('click', function() {
-        goToSlide(parseInt(this.dataset.index));
-      });
-    });
-
-    // Таймер обратного отсчёта — логика как в примере
-    function startCountdown() {
-      const weddingDate = new Date('2026-06-19T15:00:00');
-      function updateTimer() {
-        const now = new Date();
-        const diff = weddingDate - now;
-        if (diff <= 0) {
-          document.getElementById('days').textContent = '00';
-          document.getElementById('hours').textContent = '00';
-          document.getElementById('minutes').textContent = '00';
-          document.getElementById('seconds').textContent = '00';
-          return;
-        }
-        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-        document.getElementById('days').textContent = days < 10 ? '0' + days : days;
-        document.getElementById('hours').textContent = hours < 10 ? '0' + hours : hours;
-        document.getElementById('minutes').textContent = minutes < 10 ? '0' + minutes : minutes;
-        document.getElementById('seconds').textContent = seconds < 10 ? '0' + seconds : seconds;
+          setTimeout(() => {
+            if (invScreen) {
+              invScreen.classList.add('active');
+              requestAnimationFrame(() => {
+                handleScrollAnimation();
+              });
+            }
+          }, 400);
+        }, 150);
       }
-      updateTimer();
-      setInterval(updateTimer, 1000);
-    }
-    startCountdown();
-  })();
-</script>
+
+      btn.addEventListener('touchstart', onDragStart, {passive: false});
+      document.addEventListener('touchmove', onDragMove, {passive: false});
+      document.addEventListener('touchend', onDragEnd);
+      btn.addEventListener('mousedown', onDragStart);
+      document.addEventListener('mousemove', onDragMove);
+      document.addEventListener('mouseup', onDragEnd);
+
+      function isElementInViewport(el, offset = 0.15) {
+        const rect = el.getBoundingClientRect();
+        const windowHeight = window.innerHeight || document.documentElement.clientHeight;
+        return rect.top <= windowHeight * (1 - offset) && rect.bottom >= 0;
+      }
+
+      function handleScrollAnimation() {
+        const fadeElements = document.querySelectorAll('.fade-in-element:not(.visible)');
+        const fadeImages = document.querySelectorAll('.fade-in-image:not(.visible)');
+        
+        fadeElements.forEach(el => {
+          if (isElementInViewport(el, 0.2)) {
+            el.classList.add('visible');
+          }
+        });
+        
+        fadeImages.forEach(el => {
+          if (isElementInViewport(el, 0.25)) {
+            el.classList.add('visible');
+          }
+        });
+      }
+
+      if (invScreen) {
+        invScreen.addEventListener('scroll', handleScrollAnimation, { passive: true });
+      }
+
+      // Слайдер изображений
+      const slider = document.getElementById('venueSlider');
+      const dots = document.querySelectorAll('.slider-dot');
+
+      function goToSlide(index) {
+        slider.style.transform = `translateX(-${index * 100}%)`;
+        dots.forEach(dot => dot.classList.remove('active'));
+        dots[index].classList.add('active');
+      }
+
+      dots.forEach(dot => {
+        dot.addEventListener('click', function() {
+          goToSlide(parseInt(this.dataset.index));
+        });
+      });
+
+      // Таймер обратного отсчёта
+      function startCountdown() {
+        const weddingDate = new Date('2026-06-19T15:00:00');
+        
+        function updateTimer() {
+          const now = new Date();
+          const diff = weddingDate - now;
+          
+          if (diff <= 0) {
+            document.getElementById('days').textContent = '00';
+            document.getElementById('hours').textContent = '00';
+            document.getElementById('minutes').textContent = '00';
+            document.getElementById('seconds').textContent = '00';
+            return;
+          }
+          
+          const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+          const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+          const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+          const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+          
+          document.getElementById('days').textContent = days < 10 ? '0' + days : days;
+          document.getElementById('hours').textContent = hours < 10 ? '0' + hours : hours;
+          document.getElementById('minutes').textContent = minutes < 10 ? '0' + minutes : minutes;
+          document.getElementById('seconds').textContent = seconds < 10 ? '0' + seconds : seconds;
+        }
+        
+        updateTimer();
+        setInterval(updateTimer, 1000);
+      }
+      
+      startCountdown();
+    })();
+  </script>
 </body>
 </html>
