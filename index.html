@@ -997,14 +997,18 @@
 
 <script>
   (function() {
+    // --- 1. ПЕРЕМЕННЫЕ ---
     const track = document.getElementById('sliderTrack');
     const btn = document.getElementById('sliderBtn');
     const callScreen = document.getElementById('callScreen');
     const invScreen = document.getElementById('invScreen');
+    const slider = document.getElementById('venueSlider');
+    const dots = document.querySelectorAll('.slider-dot');
     
     let isDragging = false;
     let startX = 0, currentX = 0, maxSlide = 0;
 
+    // --- 2. ЛОГИКА СЛАЙДЕРА "ОТВЕТИТЬ" (iPhone Style) ---
     function updateMaxSlide() {
       if (track && btn) maxSlide = track.offsetWidth - btn.offsetWidth - 12;
     }
@@ -1014,20 +1018,20 @@
     function getX(e) { return e.type.includes('mouse') ? e.pageX : e.touches[0].clientX; }
 
     function onDragStart(e) {
-      e.preventDefault();
       isDragging = true;
       startX = getX(e);
       btn.style.transition = 'none';
     }
+
     function onDragMove(e) {
       if (!isDragging) return;
-      if (e.type === 'touchmove') e.preventDefault();
       let walk = getX(e) - startX;
       if (walk < 0) walk = 0;
       if (walk > maxSlide) walk = maxSlide;
       currentX = walk;
       btn.style.transform = `translateX(${currentX}px)`;
     }
+
     function onDragEnd() {
       if (!isDragging) return;
       isDragging = false;
@@ -1041,6 +1045,7 @@
         currentX = 0;
       }
     }
+
     function acceptCall() {
       setTimeout(() => {
         if (callScreen) {
@@ -1050,9 +1055,8 @@
         setTimeout(() => {
           if (invScreen) {
             invScreen.classList.add('active');
-            requestAnimationFrame(() => {
-              handleScrollAnimation();
-            });
+            // Запускаем проверку видимости элементов сразу после открытия
+            setTimeout(handleScrollAnimation, 100);
           }
         }, 400);
       }, 150);
@@ -1065,6 +1069,7 @@
     document.addEventListener('mousemove', onDragMove);
     document.addEventListener('mouseup', onDragEnd);
 
+    // --- 3. АНИМАЦИИ ПРИ ПРОКРУТКЕ ---
     function isElementInViewport(el, offset = 0.15) {
       const rect = el.getBoundingClientRect();
       const windowHeight = window.innerHeight || document.documentElement.clientHeight;
@@ -1072,17 +1077,9 @@
     }
 
     function handleScrollAnimation() {
-      const fadeElements = document.querySelectorAll('.fade-in-element:not(.visible)');
-      const fadeImages = document.querySelectorAll('.fade-in-image:not(.visible)');
-      
-      fadeElements.forEach(el => {
-        if (isElementInViewport(el, 0.2)) {
-          el.classList.add('visible');
-        }
-      });
-      
-      fadeImages.forEach(el => {
-        if (isElementInViewport(el, 0.25)) {
+      const elements = document.querySelectorAll('.fade-in-element:not(.visible), .fade-in-image:not(.visible)');
+      elements.forEach(el => {
+        if (isElementInViewport(el, 0.1)) {
           el.classList.add('visible');
         }
       });
@@ -1092,11 +1089,9 @@
       invScreen.addEventListener('scroll', handleScrollAnimation, { passive: true });
     }
 
-    // Слайдер изображений
-    const slider = document.getElementById('venueSlider');
-    const dots = document.querySelectorAll('.slider-dot');
-
+    // --- 4. СЛАЙДЕР ФОТОГРАФИЙ МЕСТА ---
     function goToSlide(index) {
+      if (!slider) return;
       slider.style.transform = `translateX(-${index * 100}%)`;
       dots.forEach(dot => dot.classList.remove('active'));
       dots[index].classList.add('active');
@@ -1104,54 +1099,45 @@
 
     dots.forEach(dot => {
       dot.addEventListener('click', function() {
-        goToSlide(parseInt(this.dataset.index));
+        const index = parseInt(this.getAttribute('data-index'));
+        goToSlide(index);
       });
     });
 
-    // Таймер обратного отсчёта
-    function startCountdown() {
-      function updateTimer() {
-        const now = new Date().getTime();
-        
-        // Устанавливаем дату: 19 июня 2026, 15:00:00
-        const targetDate = new Date();
-        targetDate.setFullYear(2026);
-        targetDate.setMonth(5); // Июнь (0-11)
-        targetDate.setDate(19);
-        targetDate.setHours(15, 0, 0, 0);
-        
-        const target = targetDate.getTime();
-        let diff = target - now;
-        
-        if (diff <= 0) {
-          document.getElementById('days').textContent = '00';
-          document.getElementById('hours').textContent = '00';
-          document.getElementById('minutes').textContent = '00';
-          document.getElementById('seconds').textContent = '00';
-          return;
-        }
-        
-        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        diff -= days * (1000 * 60 * 60 * 24);
-        
-        const hours = Math.floor(diff / (1000 * 60 * 60));
-        diff -= hours * (1000 * 60 * 60);
-        
-        const minutes = Math.floor(diff / (1000 * 60));
-        diff -= minutes * (1000 * 60);
-        
-        const seconds = Math.floor(diff / 1000);
-        
-        document.getElementById('days').textContent = days.toString().padStart(2, '0');
-        document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
-        document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
-        document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
+    // --- 5. ТАЙМЕР ОБРАТНОГО ОТСЧЕТА ---
+    function updateCountdown() {
+      // Установка даты: год, месяц (0-11), день, часы, минуты
+      const weddingDate = new Date(2026, 5, 19, 15, 0, 0).getTime();
+      const now = new Date().getTime();
+      const distance = weddingDate - now;
+
+      const dDisplay = document.getElementById('days');
+      const hDisplay = document.getElementById('hours');
+      const mDisplay = document.getElementById('minutes');
+      const sDisplay = document.getElementById('seconds');
+
+      if (distance < 0) {
+        document.querySelector('.countdown-title').innerHTML = "Этот счастливый день настал!";
+        const row = document.getElementById('countdownRow');
+        if (row) row.style.display = 'none';
+        return;
       }
-      
-      updateTimer();
-      setInterval(updateTimer, 1000);
+
+      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+      if (dDisplay) dDisplay.innerText = days < 10 ? '0' + days : days;
+      if (hDisplay) hDisplay.innerText = hours < 10 ? '0' + hours : hours;
+      if (mDisplay) mDisplay.innerText = minutes < 10 ? '0' + minutes : minutes;
+      if (sDisplay) sDisplay.innerText = seconds < 10 ? '0' + seconds : seconds;
     }
-    startCountdown();
+
+    // Инициализация таймера
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+
   })();
 </script>
 </body>
