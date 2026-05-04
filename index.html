@@ -189,9 +189,9 @@
                   url('пара.jpg') center/cover;
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      justify-content: flex-start;
       align-items: center;
-      padding: 20px;
+      padding: 30px 20px 80px;
       color: #fff;
       flex-shrink: 0;
       text-align: center;
@@ -203,6 +203,7 @@
       text-transform: uppercase;
       font-weight: 600;
       white-space: nowrap;
+      margin-top: 10px;
     }
     .hero-date {
       font-family: 'Cormorant Garamond', serif;
@@ -213,37 +214,62 @@
       font-weight: 400;
       text-transform: uppercase;
     }
+    .hero-spacer {
+      flex: 1;
+    }
     .wedding-day-title {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 22px;
-      letter-spacing: 8px;
-      opacity: 0.85;
-      margin-top: 15px;
+      font-size: 24px;
+      letter-spacing: 10px;
+      opacity: 0.8;
       font-weight: 500;
       text-transform: uppercase;
       font-style: italic;
+      margin-bottom: 10px;
     }
 
     /* Кнопка музыки */
-    .music-toggle-btn {
-      background: rgba(0,0,0,0.4);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,0.25);
-      color: #fff;
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 16px;
-      letter-spacing: 2px;
-      padding: 12px 28px;
-      margin: 30px auto;
-      display: block;
-      cursor: pointer;
-      text-transform: uppercase;
-      border-radius: 30px;
-      transition: background 0.3s;
+    .music-section {
+      background-color: #EAE3D9;
+      padding: 20px 30px 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
-    .music-toggle-btn:hover {
-      background: rgba(0,0,0,0.6);
+    .music-toggle-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      padding: 10px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .music-icon {
+      width: 48px;
+      height: 48px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: transform 0.2s ease;
+    }
+    .music-icon svg {
+      width: 36px;
+      height: 36px;
+    }
+    .music-icon:active {
+      transform: scale(0.9);
+    }
+    .music-label {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 3px;
+      color: #1E1E1E;
+      text-transform: uppercase;
+      opacity: 0.7;
     }
 
     /* Приглашение */
@@ -862,13 +888,28 @@
     <!-- Экран приглашения -->
     <div class="invitation-screen" id="invScreen">
       <div class="inv-hero fade-in-element">
-        <div class="hero-names">СЕРГЕЙ & САМИРА</div>
+        <div class="hero-names">СЕРГЕЙ И САМИРА</div>
         <div class="hero-date">19.06.2026</div>
+        <div class="hero-spacer"></div>
         <div class="wedding-day-title">Wedding Day</div>
       </div>
 
-      <!-- Кнопка музыки -->
-      <button class="music-toggle-btn fade-in-element" id="musicToggle">Включить музыку</button>
+      <!-- Кнопка музыки (на фоне приглашения) -->
+      <div class="music-section fade-in-element">
+        <button class="music-toggle-btn" id="musicToggle">
+          <div class="music-icon" id="musicIcon">
+            <!-- Иконка Play (треугольник вправо) -->
+            <svg id="playIcon" viewBox="0 0 24 24" fill="#1E1E1E">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+            <!-- Иконка Pause (две полоски) - скрыта по умолчанию -->
+            <svg id="pauseIcon" viewBox="0 0 24 24" fill="#1E1E1E" style="display: none;">
+              <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+            </svg>
+          </div>
+          <span class="music-label" id="musicLabel">ВКЛЮЧИТЬ МУЗЫКУ</span>
+        </button>
+      </div>
       <audio id="bgMusic" loop preload="auto" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"></audio>
 
       <div class="inv-details fade-in-element">
@@ -1113,19 +1154,26 @@
       // Управление музыкой
       const musicToggle = document.getElementById('musicToggle');
       const bgMusic = document.getElementById('bgMusic');
+      const playIcon = document.getElementById('playIcon');
+      const pauseIcon = document.getElementById('pauseIcon');
+      const musicLabel = document.getElementById('musicLabel');
       
-      if (musicToggle && bgMusic) {
+      if (musicToggle && bgMusic && playIcon && pauseIcon && musicLabel) {
         let musicPlaying = false;
         
         musicToggle.addEventListener('click', function() {
           if (musicPlaying) {
             bgMusic.pause();
-            musicToggle.textContent = 'Включить музыку';
+            playIcon.style.display = 'block';
+            pauseIcon.style.display = 'none';
+            musicLabel.textContent = 'ВКЛЮЧИТЬ МУЗЫКУ';
             musicPlaying = false;
           } else {
             // Современные браузеры требуют взаимодействия пользователя для воспроизведения
             bgMusic.play().then(() => {
-              musicToggle.textContent = 'Выключить музыку';
+              playIcon.style.display = 'none';
+              pauseIcon.style.display = 'block';
+              musicLabel.textContent = 'ВЫКЛЮЧИТЬ МУЗЫКУ';
               musicPlaying = true;
             }).catch(error => {
               console.warn('Не удалось воспроизвести музыку:', error);
