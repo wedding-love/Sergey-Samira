@@ -1,5 +1,5 @@
 
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
@@ -230,10 +230,12 @@
       margin-bottom: 5px;
     }
 
-    /* Кнопка музыки */
-    .music-section {
+    /* Кнопка музыки + приглашение (соединены) */
+    .music-invite-wrapper {
       background-color: #EAE3D9;
-      padding: 25px 30px 35px;
+    }
+    .music-section {
+      padding: 25px 30px 10px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -896,42 +898,46 @@
         <div class="wedding-day-title">Wedding Day</div>
       </div>
 
-      <!-- Кнопка музыки (на фоне приглашения) -->
-      <div class="music-section fade-in-element">
-        <button class="music-toggle-btn" id="musicToggle">
-          <div class="music-icon" id="musicIcon">
-            <!-- Иконка Play (треугольник вправо) -->
-            <svg id="playIcon" viewBox="0 0 24 24" fill="#1E1E1E">
-              <path d="M8 5v14l11-7z"/>
-            </svg>
-            <!-- Иконка Pause (две полоски) - скрыта по умолчанию -->
-            <svg id="pauseIcon" viewBox="0 0 24 24" fill="#1E1E1E" style="display: none;">
-              <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
-            </svg>
-          </div>
-          <span class="music-label" id="musicLabel">ВКЛЮЧИТЬ МУЗЫКУ</span>
-        </button>
-      </div>
-      <audio id="bgMusic" loop preload="auto" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"></audio>
-
-      <div class="inv-details fade-in-element">
-        <span class="invite-tag">[Приглашение]</span>
-        <h2 class="invite-title">INVI<br>TATION</h2>
-        <p class="invite-desc">
-          Дорогие друзья, мы рады пригласить вас на нашу свадьбу. Это будет особенный день, и нам важно, чтобы вы были рядом.
-        </p>
-        <div class="calendar-wrap">
-          <div class="calendar-month">Июнь 2026</div>
-          <div class="calendar-grid">
-            <div class="day-name">ПН</div><div class="day-name">ВТ</div><div class="day-name">СР</div><div class="day-name">ЧТ</div><div class="day-name">ПТ</div><div class="day-name">СБ</div><div class="day-name">ВС</div>
-            <div class="day">1</div><div class="day">2</div><div class="day">3</div><div class="day">4</div><div class="day">5</div><div class="day">6</div><div class="day">7</div>
-            <div class="day">8</div><div class="day">9</div><div class="day">10</div><div class="day">11</div><div class="day">12</div><div class="day">13</div><div class="day">14</div>
-            <div class="day">15</div><div class="day">16</div><div class="day">17</div><div class="day">18</div><div class="day wedding-day">19</div><div class="day">20</div><div class="day">21</div>
-            <div class="day">22</div><div class="day">23</div><div class="day">24</div><div class="day">25</div><div class="day">26</div><div class="day">27</div><div class="day">28</div>
-            <div class="day">29</div><div class="day">30</div>
-          </div>
+      <!-- Музыка + Приглашение (соединены) -->
+      <div class="music-invite-wrapper fade-in-element">
+        <!-- Кнопка музыки -->
+        <div class="music-section">
+          <button class="music-toggle-btn" id="musicToggle">
+            <div class="music-icon" id="musicIcon">
+              <!-- Иконка Play (треугольник вправо) -->
+              <svg id="playIcon" viewBox="0 0 24 24" fill="#1E1E1E">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+              <!-- Иконка Pause (две полоски) - скрыта по умолчанию -->
+              <svg id="pauseIcon" viewBox="0 0 24 24" fill="#1E1E1E" style="display: none;">
+                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+              </svg>
+            </div>
+            <span class="music-label" id="musicLabel">ВКЛЮЧИТЬ МУЗЫКУ</span>
+          </button>
         </div>
-        <div class="divider"></div>
+        <audio id="bgMusic" loop preload="auto" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"></audio>
+
+        <!-- Приглашение -->
+        <div class="inv-details">
+          <span class="invite-tag">[Приглашение]</span>
+          <h2 class="invite-title">INVI<br>TATION</h2>
+          <p class="invite-desc">
+            Дорогие друзья, мы рады пригласить вас на нашу свадьбу. Это будет особенный день, и нам важно, чтобы вы были рядом.
+          </p>
+          <div class="calendar-wrap">
+            <div class="calendar-month">Июнь 2026</div>
+            <div class="calendar-grid">
+              <div class="day-name">ПН</div><div class="day-name">ВТ</div><div class="day-name">СР</div><div class="day-name">ЧТ</div><div class="day-name">ПТ</div><div class="day-name">СБ</div><div class="day-name">ВС</div>
+              <div class="day">1</div><div class="day">2</div><div class="day">3</div><div class="day">4</div><div class="day">5</div><div class="day">6</div><div class="day">7</div>
+              <div class="day">8</div><div class="day">9</div><div class="day">10</div><div class="day">11</div><div class="day">12</div><div class="day">13</div><div class="day">14</div>
+              <div class="day">15</div><div class="day">16</div><div class="day">17</div><div class="day">18</div><div class="day wedding-day">19</div><div class="day">20</div><div class="day">21</div>
+              <div class="day">22</div><div class="day">23</div><div class="day">24</div><div class="day">25</div><div class="day">26</div><div class="day">27</div><div class="day">28</div>
+              <div class="day">29</div><div class="day">30</div>
+            </div>
+          </div>
+          <div class="divider"></div>
+        </div>
       </div>
 
       <div class="inv-location fade-in-element">
