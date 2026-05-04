@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -904,16 +903,16 @@
         <div class="music-section">
           <button class="music-toggle-btn" id="musicToggle">
             <div class="music-icon" id="musicIcon">
-              <!-- Иконка Play (треугольник вправо) -->
-              <svg id="playIcon" viewBox="0 0 24 24" fill="#1E1E1E">
+              <!-- Иконка Play (треугольник вправо) - скрыта по умолчанию, так как музыка играет -->
+              <svg id="playIcon" viewBox="0 0 24 24" fill="#1E1E1E" style="display: none;">
                 <path d="M8 5v14l11-7z"/>
               </svg>
-              <!-- Иконка Pause (две полоски) - скрыта по умолчанию -->
-              <svg id="pauseIcon" viewBox="0 0 24 24" fill="#1E1E1E" style="display: none;">
+              <!-- Иконка Pause (две полоски) - видна сразу, так как музыка играет -->
+              <svg id="pauseIcon" viewBox="0 0 24 24" fill="#1E1E1E">
                 <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
               </svg>
             </div>
-            <span class="music-label" id="musicLabel">ВКЛЮЧИТЬ МУЗЫКУ</span>
+            <span class="music-label" id="musicLabel">ВЫКЛЮЧИТЬ МУЗЫКУ</span>
           </button>
         </div>
         <audio id="bgMusic" loop preload="auto" src="привет.mp3"></audio>
@@ -923,7 +922,7 @@
           <span class="invite-tag">[Приглашение]</span>
           <h2 class="invite-title">INVI<br>TATION</h2>
           <p class="invite-desc">
-            Дорогие гости, мы рады пригласить вас на нашу свадьбу. Это будет особенный день, и нам важно, чтобы вы были рядом.
+            Дорогие гости ,  мы рады пригласить вас на нашу свадьбу. Это будет особенный день, и нам важно, чтобы вы были рядом.
           </p>
           <div class="calendar-wrap">
             <div class="calendar-month">Июнь 2026</div>
@@ -1105,13 +1104,27 @@
         if (bgMusic && !musicPlaying) {
           bgMusic.play().then(() => {
             musicPlaying = true;
-            if (playIcon) playIcon.style.display = 'none';
-            if (pauseIcon) pauseIcon.style.display = 'block';
-            if (musicLabel) musicLabel.textContent = 'ВЫКЛЮЧИТЬ МУЗЫКУ';
+            updateMusicUI();
           }).catch(error => {
-            // Автовоспроизведение заблокировано браузером, будем ждать взаимодействия
             console.log('Автовоспроизведение заблокировано, ожидание взаимодействия с пользователем');
+            // Показываем кнопку play, так как музыка не играет
+            if (playIcon) playIcon.style.display = 'block';
+            if (pauseIcon) pauseIcon.style.display = 'none';
+            if (musicLabel) musicLabel.textContent = 'ВКЛЮЧИТЬ МУЗЫКУ';
           });
+        }
+      }
+
+      // Обновление UI в зависимости от состояния музыки
+      function updateMusicUI() {
+        if (musicPlaying) {
+          if (playIcon) playIcon.style.display = 'none';
+          if (pauseIcon) pauseIcon.style.display = 'block';
+          if (musicLabel) musicLabel.textContent = 'ВЫКЛЮЧИТЬ МУЗЫКУ';
+        } else {
+          if (playIcon) playIcon.style.display = 'block';
+          if (pauseIcon) pauseIcon.style.display = 'none';
+          if (musicLabel) musicLabel.textContent = 'ВКЛЮЧИТЬ МУЗЫКУ';
         }
       }
 
@@ -1186,24 +1199,18 @@
       const musicToggle = document.getElementById('musicToggle');
       
       if (musicToggle && bgMusic && playIcon && pauseIcon && musicLabel) {
-        musicToggle.addEventListener('click', function() {
+        musicToggle.addEventListener('click', function(e) {
+          e.preventDefault();
           if (musicPlaying) {
             bgMusic.pause();
-            playIcon.style.display = 'block';
-            pauseIcon.style.display = 'none';
-            musicLabel.textContent = 'ВКЛЮЧИТЬ МУЗЫКУ';
             musicPlaying = false;
+            updateMusicUI();
           } else {
-            // Современные браузеры требуют взаимодействия пользователя для воспроизведения
             bgMusic.play().then(() => {
-              playIcon.style.display = 'none';
-              pauseIcon.style.display = 'block';
-              musicLabel.textContent = 'ВЫКЛЮЧИТЬ МУЗЫКУ';
               musicPlaying = true;
+              updateMusicUI();
             }).catch(error => {
               console.warn('Не удалось воспроизвести музыку:', error);
-              // Можно показать уведомление пользователю
-              alert('Нажмите ещё раз, чтобы включить музыку');
             });
           }
         });
@@ -1347,19 +1354,39 @@
         window.addEventListener('load', startCountdown);
       }
       
-      // Попытка автовоспроизведения при загрузке страницы
+      // АВТОМАТИЧЕСКОЕ ВОСПРОИЗВЕДЕНИЕ МУЗЫКИ
       if (bgMusic) {
-        // Пробуем сразу при загрузке
-        window.addEventListener('load', function() {
-          setTimeout(tryAutoPlay, 500);
-        });
-        
-        // Также пробуем при любом клике пользователя на странице (если автовоспроизведение заблокировано)
-        document.addEventListener('click', function() {
-          if (!musicPlaying && invScreen && invScreen.classList.contains('active')) {
-            tryAutoPlay();
+        // Пытаемся запустить сразу после загрузки страницы
+        bgMusic.play().then(() => {
+          musicPlaying = true;
+          updateMusicUI();
+          console.log('Музыка успешно запущена автоматически');
+        }).catch(() => {
+          console.log('Автозапуск отклонён браузером. Ожидание первого взаимодействия.');
+          // Устанавливаем UI в состояние "пауза"
+          updateMusicUI();
+          
+          // Запускаем при первом взаимодействии пользователя со страницей
+          function startMusicOnInteraction() {
+            if (!musicPlaying && bgMusic) {
+              bgMusic.play().then(() => {
+                musicPlaying = true;
+                updateMusicUI();
+                console.log('Музыка запущена после взаимодействия');
+                // Удаляем обработчики после успешного запуска
+                document.removeEventListener('click', startMusicOnInteraction);
+                document.removeEventListener('touchstart', startMusicOnInteraction);
+                document.removeEventListener('scroll', startMusicOnInteraction);
+              }).catch(() => {
+                console.log('Повторная попытка запуска не удалась');
+              });
+            }
           }
-        }, { once: false });
+          
+          document.addEventListener('click', startMusicOnInteraction, { once: true });
+          document.addEventListener('touchstart', startMusicOnInteraction, { once: true });
+          document.addEventListener('scroll', startMusicOnInteraction, { once: true });
+        });
       }
     })();
   </script>
