@@ -189,12 +189,11 @@
                   url('пара.jpg') center/cover;
       display: flex;
       flex-direction: column;
-      justify-content: flex-start;
-      padding: 20px 20px 60px;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
       color: #fff;
       flex-shrink: 0;
-    }
-    .hero-top {
       text-align: center;
     }
     .hero-names {
@@ -214,19 +213,37 @@
       font-weight: 400;
       text-transform: uppercase;
     }
-    .hero-spacer {
-      flex: 1;
-    }
-    .love-text {
-      align-self: flex-end;
-      text-align: right;
-      max-width: 260px;
+    .wedding-day-title {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 18px;
-      line-height: 1.6;
+      font-size: 22px;
+      letter-spacing: 8px;
       opacity: 0.85;
-      font-weight: 400;
+      margin-top: 15px;
+      font-weight: 500;
+      text-transform: uppercase;
       font-style: italic;
+    }
+
+    /* Кнопка музыки */
+    .music-toggle-btn {
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.25);
+      color: #fff;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 16px;
+      letter-spacing: 2px;
+      padding: 12px 28px;
+      margin: 30px auto;
+      display: block;
+      cursor: pointer;
+      text-transform: uppercase;
+      border-radius: 30px;
+      transition: background 0.3s;
+    }
+    .music-toggle-btn:hover {
+      background: rgba(0,0,0,0.6);
     }
 
     /* Приглашение */
@@ -845,15 +862,14 @@
     <!-- Экран приглашения -->
     <div class="invitation-screen" id="invScreen">
       <div class="inv-hero fade-in-element">
-        <div class="hero-top">
-          <div class="hero-names">СЕРГЕЙ И САМИРА</div>
-          <div class="hero-date">19.06.2026</div>
-        </div>
-        <div class="hero-spacer"></div>
-        <div class="love-text">
-          Любовь — это когда весь мир помещается в одном человеке.
-        </div>
+        <div class="hero-names">СЕРГЕЙ & САМИРА</div>
+        <div class="hero-date">19.06.2026</div>
+        <div class="wedding-day-title">Wedding Day</div>
       </div>
+
+      <!-- Кнопка музыки -->
+      <button class="music-toggle-btn fade-in-element" id="musicToggle">Включить музыку</button>
+      <audio id="bgMusic" loop preload="auto" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"></audio>
 
       <div class="inv-details fade-in-element">
         <span class="invite-tag">[Приглашение]</span>
@@ -907,10 +923,10 @@
           <h2 class="timing-title">TIME<br>LINE</h2>
         </div>
         <div class="timeline-list">
-          <div class="time-item"><span class="time-value">15:00</span><span class="time-desc">Сбор гостей</span></div>
-          <div class="time-item"><span class="time-value">15:30</span><span class="time-desc">Торжественная церемония</span></div>
-          <div class="time-item"><span class="time-value">17:00</span><span class="time-desc">Праздничный ужин</span></div>
-          <div class="time-item"><span class="time-value">22:00</span><span class="time-desc">Завершение вечера</span></div>
+          <div class="time-item"><span class="time-value">14:30</span><span class="time-desc">Сбор гостей, фуршет</span></div>
+          <div class="time-item"><span class="time-value">15:00</span><span class="time-desc">Выездная церемония</span></div>
+          <div class="time-item"><span class="time-value">16:00</span><span class="time-desc">Праздничный банкет</span></div>
+          <div class="time-item"><span class="time-value">23:00</span><span class="time-desc">Завершение вечера</span></div>
         </div>
       </div>
 
@@ -924,7 +940,7 @@
           Будем благодарны, если в своих нарядах вы поддержите цветовую палитру нашего праздника:
         </p>
         <div class="dresscode-colors">
-          <div class="dresscode-color" style="background-color: #524902;"></div>
+          <div class="dresscode-color" style="background-color: #7B7A3C;"></div>
           <div class="dresscode-color" style="background-color: #471915;"></div>
           <div class="dresscode-color" style="background-color: #ffefdf;"></div>
           <div class="dresscode-color" style="background-color: #f1eee6;"></div>
@@ -942,7 +958,7 @@
         </p>
       </div>
 
-      <!-- АНКЕТА ГОСТЯ (ИСПРАВЛЕНО) -->
+      <!-- АНКЕТА ГОСТЯ -->
       <div class="inv-form fade-in-element">
         <div class="form-header">
           <span class="form-tag">[Анкета гостя]</span>
@@ -1093,6 +1109,32 @@
       document.addEventListener('touchend', onDragEnd);
       document.addEventListener('mousemove', onDragMove);
       document.addEventListener('mouseup', onDragEnd);
+
+      // Управление музыкой
+      const musicToggle = document.getElementById('musicToggle');
+      const bgMusic = document.getElementById('bgMusic');
+      
+      if (musicToggle && bgMusic) {
+        let musicPlaying = false;
+        
+        musicToggle.addEventListener('click', function() {
+          if (musicPlaying) {
+            bgMusic.pause();
+            musicToggle.textContent = 'Включить музыку';
+            musicPlaying = false;
+          } else {
+            // Современные браузеры требуют взаимодействия пользователя для воспроизведения
+            bgMusic.play().then(() => {
+              musicToggle.textContent = 'Выключить музыку';
+              musicPlaying = true;
+            }).catch(error => {
+              console.warn('Не удалось воспроизвести музыку:', error);
+              // Можно показать уведомление пользователю
+              alert('Нажмите ещё раз, чтобы включить музыку');
+            });
+          }
+        });
+      }
 
       function isElementInViewport(el, offset) {
         if (!el) return false;
