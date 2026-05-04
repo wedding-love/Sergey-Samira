@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -922,7 +923,7 @@
           <span class="invite-tag">[Приглашение]</span>
           <h2 class="invite-title">INVI<br>TATION</h2>
           <p class="invite-desc">
-            Дорогие гости , мы рады пригласить вас на нашу свадьбу. Это будет особенный день, и нам важно, чтобы вы были рядом.
+            Дорогие гости, мы рады пригласить вас на нашу свадьбу. Это будет особенный день, и нам важно, чтобы вы были рядом.
           </p>
           <div class="calendar-wrap">
             <div class="calendar-month">Июнь 2026</div>
@@ -1071,6 +1072,10 @@
       const btn = document.getElementById('sliderBtn');
       const callScreen = document.getElementById('callScreen');
       const invScreen = document.getElementById('invScreen');
+      const bgMusic = document.getElementById('bgMusic');
+      const playIcon = document.getElementById('playIcon');
+      const pauseIcon = document.getElementById('pauseIcon');
+      const musicLabel = document.getElementById('musicLabel');
       
       // Проверка наличия элементов
       if (!track || !btn || !callScreen || !invScreen) {
@@ -1080,6 +1085,7 @@
 
       let isDragging = false;
       let startX = 0, currentX = 0, maxSlide = 0;
+      let musicPlaying = false;
 
       function updateMaxSlide() {
         if (track && btn) {
@@ -1092,6 +1098,21 @@
 
       function getX(e) { 
         return e.type.includes('mouse') ? e.pageX : (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+      }
+
+      // Функция для попытки автовоспроизведения
+      function tryAutoPlay() {
+        if (bgMusic && !musicPlaying) {
+          bgMusic.play().then(() => {
+            musicPlaying = true;
+            if (playIcon) playIcon.style.display = 'none';
+            if (pauseIcon) pauseIcon.style.display = 'block';
+            if (musicLabel) musicLabel.textContent = 'ВЫКЛЮЧИТЬ МУЗЫКУ';
+          }).catch(error => {
+            // Автовоспроизведение заблокировано браузером, будем ждать взаимодействия
+            console.log('Автовоспроизведение заблокировано, ожидание взаимодействия с пользователем');
+          });
+        }
       }
 
       function onDragStart(e) {
@@ -1142,6 +1163,9 @@
               setTimeout(function() {
                 handleScrollAnimation();
               }, 100);
+              
+              // Пытаемся включить музыку после открытия приглашения
+              tryAutoPlay();
             }
           }, 400);
         }, 150);
@@ -1160,14 +1184,8 @@
 
       // Управление музыкой
       const musicToggle = document.getElementById('musicToggle');
-      const bgMusic = document.getElementById('bgMusic');
-      const playIcon = document.getElementById('playIcon');
-      const pauseIcon = document.getElementById('pauseIcon');
-      const musicLabel = document.getElementById('musicLabel');
       
       if (musicToggle && bgMusic && playIcon && pauseIcon && musicLabel) {
-        let musicPlaying = false;
-        
         musicToggle.addEventListener('click', function() {
           if (musicPlaying) {
             bgMusic.pause();
@@ -1280,10 +1298,20 @@
               return;
             }
             
+            // Правильный расчет оставшегося времени
             var days = Math.floor(diff / (1000 * 60 * 60 * 24));
             var hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             var minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
             var seconds = Math.floor((diff % (1000 * 60)) / 1000);
+            
+            // Если осталось ровно N дней и 0 часов, показываем 23:59:59 для часов:минут:секунд
+            // когда дни > 0 и остальное время = 0
+            if (days > 0 && hours === 0 && minutes === 0 && seconds === 0) {
+              hours = 23;
+              minutes = 59;
+              seconds = 59;
+              days = days - 1; // уменьшаем дни, так как мы "заимствовали" один день для часов
+            }
             
             if (daysEl) daysEl.textContent = days < 10 ? '0' + days : days;
             if (hoursEl) hoursEl.textContent = hours < 10 ? '0' + hours : hours;
@@ -1318,7 +1346,22 @@
       } else {
         window.addEventListener('load', startCountdown);
       }
+      
+      // Попытка автовоспроизведения при загрузке страницы
+      if (bgMusic) {
+        // Пробуем сразу при загрузке
+        window.addEventListener('load', function() {
+          setTimeout(tryAutoPlay, 500);
+        });
+        
+        // Также пробуем при любом клике пользователя на странице (если автовоспроизведение заблокировано)
+        document.addEventListener('click', function() {
+          if (!musicPlaying && invScreen && invScreen.classList.contains('active')) {
+            tryAutoPlay();
+          }
+        }, { once: false });
+      }
     })();
   </script>
 </body>
-</html> 
+</html>
